@@ -1,0 +1,7 @@
+.env
+*.jpg
+*.gif
+*.png
+*.json
+*.jpeg
+*.webp

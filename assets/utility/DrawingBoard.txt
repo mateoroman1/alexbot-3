@@ -1,0 +1,105 @@
+## :: PVE SYSTEM :: ##
+
+Description:
+An instance is created where a single boss card is rolled, players join in and are assigned a rolled character along with some number of tool cards
+Each boss card has a health value
+Each character card has strength value based on their rarity
+Each tool card is a multiplier that, depending on the character will vary. For most unrelated characters this would probably be 1.0, whereas a character directly related to that tool,
+(e.g. lathe millercut and lathe millercuts circular saw) would have a much much higher multiplier.
+Players damage towards the boss - their damage index - is a product of their characters rarity and the tool card value specific 
+The instance is won in the event that the sum of all players involved damage index is greater than or equal to the health value of the boss card.
+
+Notes/Ideas:
+-Boss card health could scale relative to the number of players involved in a raid
+-Raids need to have a discrete start and closing time to join in order to avoid hanging instances.
+-The number of rolls could be variable, we could even implement a tierlist of bosses that permits more than one roll per player. not sure the best way this could
+be implemented but its a cool idea.
+-Could possible have negative multipliers for certain tools. Would probably be very specific instances but might be fun
+
+Algorithm:
+
+On InstanceCreateCommand
+    start Timer 30s
+    Roll for bossCard
+    send bossName, Health
+    On PlayerJoin
+        Roll for Player character
+        Roll for Player tools
+        float DamageIndex = playerCharacterRarity * toolMultiplier
+    for Index in Players.damage
+        totalDamage += PlayersDI[Index].damage
+    if totalDamage >= Health
+        send PARTY HAS WON THE RAID
+        send max(PlayersDI) DID THE HIGHEST DAMAGE WITH damage
+    else
+        send PARTY WAS KILLED BY bossName
+
+Algorithm Notes:
+-This needs to be non-blocking or it will fuck up discord
+-Tool card names will be hardcoded into nested JSON with a default of 1.0, overloaded by specific character names and scaled by relevance
+-Best way seems like creating a dictionary of players involved in the raid, and set their value to the damage index that they recieve
+-Bosses need to be stored in a seperate folder
+-Need to figure out how active events are deployed with discord.py, however zero2sixty implemented might be good but that bots kinda shit and buggy so idk.
+-Not sure if PVE rolls should count towards global roll stats, im thinking no
+
+
+PVE CAMPAIGNS
+
+The main idea is we want a sense of progression in the raids. Users attempt to defeat all of a series of raids in a campaign.
+
+- The bosses increase in difficulty as they progress
+    + Essentially, this just means traversing the stat file in order until timesDefeated = 1, then move to next
+    + this instance will NOT roll random bosses and so a method of keeping track of where each server is on the campaign is neccessary
+
+- Certain items could be unlocked once a boss is defeated
+    + This may be a line in the bosses stat file (maybe "drop": "some item")
+    + In this case we need to determine what the best way to have these items available is
+        - exists in the item stats with a group = "locked" and checked when items are rolled
+        - exists in a seperate file and is then added to tool stats
+
+- Bosses can be fought in classic mode once the campaign is complete
+    + once timesDefeated = 1 they get added to bossStats
+    + could do something similar to above where bosses have some value "locked" but it makes campaigns trickier
+
+- Campaigns can be re-ran in hardmode or nightmare
+    + So here we need to think about how to access the bosses information
+
+FILE STATS 
+- Add new bosses into the existing file with some way to keep track of who has been defeated
+    + This actually might be the best method:
+        - Creating a new file to keep track of server stats would future proof alexbot a bit and also allow me to save the current campaign state in an easily referenceable place 
+        - No need for another directory and multiple other stat files to be read in. This would only require one extra
+
+Adding Bosses to main file - ?
+
+If user selects a campaign raid, we need a way of making sure the correct boss is requested AND if they have not been defeated they cannot be rolled in classic raids.
+    Starting with Tipp Tronix, if he is defeated how do we get the next boss?
+    options:
+        1. each boss as a unique ID number
+        2. hardcode some order of bosses
+
+Adding Item Evolutions -?
+
+
+
+##::PVP::##
+
+Roll the same for pve,
+round two users can choose to re roll a either the tool or their character
+best two out of three
+
+##::User Stats::##
+
+We want to be tracking user stats for all alexbot users. Should be similarly implemented to the other stats, just a json, im thinking discord
+user ID as a way of tracking users. Really it will just be whichever allows me to tag users the easiest. Gonna workshop that a bit
+
+MVP:
+ - raid wins
+ - most rolled character
+ - highest raid damage
+ - average raid damage
+
+- be able to see personal stats
+
+average damage:
+We should be tracking total raid damage for all users so we can just divide their raids by the damage theyve done and then we got the average lol easy as pie
