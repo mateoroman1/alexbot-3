@@ -50,6 +50,8 @@ class PVPView(discord.ui.View):
             
             # Start the battle in a new task to avoid blocking
             self.pvp_manager.bot.loop.create_task(self.pvp_manager._conduct_pvp_battle())
+
+            return
             
         except Exception as e:
             print(f"Error in join button: {str(e)}")

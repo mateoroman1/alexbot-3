@@ -25,9 +25,9 @@ class PVPCommands(commands.Cog):
                 print("Interaction deferred")
             
             # Check if user already has an active PVP session
-            if ctx.author.name in self.active_pvp_sessions:
-                await ctx.send("You already have an active PVP session!", ephemeral=True)
-                return
+            # if ctx.author.name in self.active_pvp_sessions:
+            #     await ctx.send("You already have an active PVP session!", ephemeral=True)
+            #     return
                 
             # Check if user is in an active raid
             # if ctx.channel.id in self.bot.get_cog('RaidCommands').active_raids:
@@ -42,9 +42,10 @@ class PVPCommands(commands.Cog):
             
             # Start the PVP session
             success = await pvp.start_pvp()
+            print(f"Pvp status: {success}")
             
-            if not success:
-                del self.active_pvp_sessions[ctx.author.name]
+
+            #del self.active_pvp_sessions[ctx.author.name]
             
         except Exception as e:
             print(f"Error in pvp command: {str(e)}")
@@ -52,7 +53,8 @@ class PVPCommands(commands.Cog):
             print(f"Traceback: {traceback.format_exc()}")
             await ctx.send(f"An error occurred: {str(e)}", ephemeral=True)
             if ctx.author.name in self.active_pvp_sessions:
-                del self.active_pvp_sessions[ctx.author.name]
+                pass
+               # del self.active_pvp_sessions[ctx.author.name]
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(PVPCommands(bot)) 
