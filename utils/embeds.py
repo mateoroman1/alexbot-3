@@ -117,13 +117,13 @@ def create_library_embed(name: str) -> discord.Embed:
 def create_pvp_join_embed(host_name: str) -> discord.Embed:
     """Create an embed for users to join a PVP battle."""
     embed = discord.Embed(
-        title="⚔️ PVP Battle Challenge!",
-        description=f"{host_name} has initiated a PVP battle!\nReact with ⚔️ to accept the challenge!",
-        color=discord.Color.red()
+        title="Alexbot PvP",
+        description=f"{host_name} challenges anyone to a PVP battle!",
+        color=discord.Color.green()
     )
     embed.add_field(
         name="Format",
-        value="Best of 3 rounds\nEach round uses different characters and tools\nHighest damage wins!"
+        value="Best of 3\nOne character, random tools\nHighest damage wins."
     )
     embed.set_footer(text="This challenge will expire in 60 seconds")
     return embed

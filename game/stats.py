@@ -156,10 +156,10 @@ class StatsManager:
             stats = UserStats(name=name)
             
         if not hasattr(stats, 'pvp_wins'):
-            stats.pvp_wins = 0
+            stats.pvp_wins = 1
             
         stats.pvp_wins += 1
-        storage.update_user_stats(name, stats)
+        storage.update_user_stats(name)
         return stats.pvp_wins
         
     @staticmethod

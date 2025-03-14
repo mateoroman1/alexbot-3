@@ -37,7 +37,7 @@ class PVPCommands(commands.Cog):
             #         return
             
             # Create new PVP session
-            pvp = PVPManager(ctx.author.name, ctx.channel)
+            pvp = PVPManager(ctx.author.name, ctx.channel, self.bot)
             self.active_pvp_sessions[ctx.author.name] = pvp
             
             # Start the PVP session
