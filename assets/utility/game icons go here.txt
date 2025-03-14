@@ -1,0 +1,14 @@
+dice.png
+
+hardmode.png
+
+lobby.png
+
+nightmare.png
+
+classic.png
+
+campaign.png
+
+q.png
+
