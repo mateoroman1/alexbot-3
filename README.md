@@ -24,7 +24,7 @@ pip install -r requirements.txt
 ```
 DISCORD_TOKEN=your_token_here
 ```
-3. Add custom data to the assets directory
+3. Add custom data to the assets directory - Starter Assets can be found at: https://github.com/mateoroman1/alexbot-starter-assets
 - assets/utility - Game icons
 - assets/characters - Images for characters rolled with the .roll command
 - assets/bosses - Images for the raid mode bosses
