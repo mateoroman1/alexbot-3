@@ -153,7 +153,7 @@ class StatsManager:
         stats = storage.get_user_stats(name)
         
         if not stats:
-            stats = UserStats(name=name)
+            stats = UserStats(name)
             
         if not hasattr(stats, 'pvp_wins'):
             stats.pvp_wins = 1
