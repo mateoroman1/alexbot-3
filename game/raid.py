@@ -392,7 +392,10 @@ class RaidManager:
                             0.10 if self.raid_state.hard_mode else
                             0.05
                         )
-                        tool_stats.character_multipliers[char_name] += multiplier_increase
+                        if tool_stats.character_multipliers.get(char_name):
+                            tool_stats.character_multipliers[char_name] += multiplier_increase
+                        else: 
+                            tool_stats.character_multipliers[char_name] = (tool_stats.default_multiplier + multiplier_increase)
 
         # Cleanup
         storage.update_server_stats(self.server_name, active_raid=False)
