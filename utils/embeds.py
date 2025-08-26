@@ -97,6 +97,8 @@ def create_raid_master_embed(
 ) -> discord.Embed:
     """Create raid master embed."""
     embed = discord.Embed(title=EMBED_RAID_MASTER, color=discord.Color.red())
+    if len(name) >= 255:
+        name = name[:255]
     embed.add_field(name=name, value=wins, inline=True)
     
     if image_path:

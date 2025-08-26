@@ -25,10 +25,10 @@ DISCORD_TOKEN: str = os.getenv('DISCORD_TOKEN')
 
 # Create bot instance
 bot = commands.Bot(
-    command_prefix='.',
+    command_prefix='!',
     intents=intents,
     owner_id=OWNER_ID,
-    activity=discord.CustomActivity("New prefix .roll | Sword of Malcom coming soon!"),
+    activity=discord.CustomActivity("!roll is BACK! | Sword of Malcom coming soon!"),
     application_id=APPLICATION_ID
 )
 

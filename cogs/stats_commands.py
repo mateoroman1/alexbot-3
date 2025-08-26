@@ -4,7 +4,7 @@ from discord import app_commands
 from discord.ext import commands
 from pathlib import Path
 
-from config.config import MAIN_GUILD_ID, IMAGES_DIR, EX_DIR
+from config.config import MAIN_GUILD_ID, IMAGES_DIR, EX_DIR, ASSETS_DIR
 from config.messages import *
 from data.storage import storage
 from game.stats import StatsManager
@@ -111,7 +111,7 @@ class StatsCommands(commands.Cog):
                 if isinstance(character, list):
                     embed = create_highest_rolls_embed(character, count, is_tie=True)
                     embed.set_image(url="attachment://image.png")
-                    file = discord.File(Path(IMAGES_DIR) / "dice.png", filename="image.png")
+                    file = discord.File(Path(ASSETS_DIR) / "dice.png", filename="image.png")
                     await ctx.send(embed=embed, file=file)
                 else:
                     # Find character image
@@ -124,7 +124,7 @@ class StatsCommands(commands.Cog):
                     
                     if not image:
                         print(f"Warning: No image found for {character}")
-                        image = Path(IMAGES_DIR) / "q.png"
+                        image = Path(ASSETS_DIR) / "q.png"
                     
                     print(f"Using image path for most common: {image}")
                     embed = create_highest_rolls_embed(character, count)
@@ -135,7 +135,7 @@ class StatsCommands(commands.Cog):
                 if isinstance(raid_char, list):
                     embed = create_raid_master_embed(", ".join(raid_char), raid_wins)
                     embed.set_image(url="attachment://image.png")
-                    file = discord.File(Path(IMAGES_DIR) / "raid.png", filename="image.png")
+                    file = discord.File(Path(ASSETS_DIR) / "raid.png", filename="image.png")
                     await ctx.send(embed=embed, file=file)
                 else:
                     # Find raider image
@@ -148,7 +148,7 @@ class StatsCommands(commands.Cog):
                     
                     if not image:
                         print(f"Warning: No image found for {raid_char}")
-                        image = Path(IMAGES_DIR) / "q.png"
+                        image = Path(ASSETS_DIR) / "q.png"
                     
                     print(f"Using image path for raid master: {image}")
                     embed = create_raid_master_embed(raid_char, raid_wins)

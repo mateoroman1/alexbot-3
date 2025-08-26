@@ -111,7 +111,7 @@ class PVPManager:
         """Conduct the best-of-3 PVP battle."""
         try:
             print("Starting PVP battle")
-            await self.channel.send(f"🏁 {self.challenger_name} has accepted the challenge! Battle starting...")
+            await self.channel.send(f"{self.challenger_name} has accepted the challenge! Battle starting...")
             await asyncio.sleep(2)  # Longer initial delay
             
             # Roll characters for both players and announce them
@@ -120,14 +120,14 @@ class PVPManager:
             
             # Announce host's character with image
             await self.channel.send(
-                f"{self.host_name} enters the arena with {host_char.split('.')[0]}!",
+                f"{self.host_name} enters the arena with {host_char.split('.')[0]}. Power Level: {storage.get_character_stats(host_char.split('.')[0].casefold()).count}",
                 file=discord.File(f"{IMAGES_DIR}/{host_char}")
             )
             await asyncio.sleep(3)  # Longer delay between character announcements
             
             # Announce challenger's character with image
             await self.channel.send(
-                f"{self.challenger_name} enters the arena with {challenger_char.split('.')[0]}!",
+                f"{self.challenger_name} enters the arena with {challenger_char.split('.')[0]}. Power Level: {storage.get_character_stats(challenger_char.split('.')[0].casefold()).count}",
                 file=discord.File(f"{IMAGES_DIR}/{challenger_char}")
             )
             await asyncio.sleep(3)  # Longer delay before battle starts
