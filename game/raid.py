@@ -63,7 +63,30 @@ class RaidManager:
         self.mode = mode
         self.server_name = server_name
         self.raid_state: Optional[RaidState] = None
+        self.boss = None
+        self.boss_stats = None
+        self.boss_name = None
+    
+    
+    def get_boss(self):
+        try:
+            print("Rolling boss...")
+            boss = roll_boss(self.mode.value, self.server_name)
+            print(f"Boss rolled: {boss}")
+            
+            print("Getting boss stats...")
+            self.boss_name = boss.split(".")[0]
+            self.boss_stats = storage.get_boss_stats(self.boss_name)
+            print(f"Boss stats retrieved: {self.boss_stats}")
+            
+            print("Creating raid state...")
+            return boss
 
+        except Exception as e:
+            print(f"Error in start_raid: {e}")
+            storage.update_server_stats(self.server_name, active_raid=False)
+            return False
+        
     async def start_raid(self, ctx: discord.ext.commands.Context) -> bool:
         """Start a new raid session."""
         try:
@@ -73,38 +96,32 @@ class RaidManager:
                 print("Raid already in progress")
                 await ctx.send(ERR_RAID_IN_PROGRESS)
                 return False
-
+        
             print("Setting active raid status...")
             storage.update_server_stats(self.server_name, active_raid=True)
             view = JoinRaidButton(ctx.author.name)
             
             # Initialize raid state
-            print("Rolling boss...")
-            boss = roll_boss(self.mode.value, self.server_name)
-            print(f"Boss rolled: {boss}")
-            
-            print("Getting boss stats...")
-            boss_name = boss.split(".")[0]
-            boss_stats = storage.get_boss_stats(boss_name)
-            if not boss_stats:
-                print(f"Error: No stats found for boss {boss_name}")
-                await ctx.send(f"Error: Could not find stats for boss {boss_name}")
+
+            self.boss = self.get_boss()
+
+            if not self.boss_stats:
+                print(f"Error: No stats found for boss {self.boss_name}")
+                await ctx.send(f"Error: Could not find stats for boss {self.boss_name}")
                 storage.update_server_stats(self.server_name, active_raid=False)
                 return False
-            print(f"Boss stats retrieved: {boss_stats}")
             
-            print("Creating raid state...")
             self.raid_state = RaidState(
                 player_list=list(view.players),
-                boss=boss,
-                boss_health=boss_stats.health * (1 + CAMPAIGN_HEALTH_SCALING * server_stats.campaign_completed),
-                boss_weakness=boss_stats.weakness
+                boss=self.boss,
+                boss_health=self.boss_stats.health * (1 + CAMPAIGN_HEALTH_SCALING * server_stats.campaign_completed),
+                boss_weakness=self.boss_stats.weakness
             )
             print("Raid state created")
 
             # Create and send join embed
             print("Creating raid embed...")
-            embed = create_raid_join_embed(view.players[0], boss_stats.wake_message)
+            embed = create_raid_join_embed(view.players[0], self.boss_stats.wake_message)
             print("Embed created")
             
             print("Setting up embed image...")
@@ -159,7 +176,7 @@ class RaidManager:
         
         for player in self.raid_state.player_list:
             # Draw character and tool
-            character = roll_character()
+            character = roll_character(revealed_only=True)
             tool = roll_tool()
             evolution_check.append(tool.split('.')[0])
             

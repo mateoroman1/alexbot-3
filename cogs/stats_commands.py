@@ -15,7 +15,8 @@ from utils.embeds import (
     create_server_stats_embed,
     create_highest_rolls_embed,
     create_raid_master_embed,
-    create_library_embed
+    create_library_embed,
+    create_top_ten_embed
 )
 
 class StatsCommands(commands.Cog):
@@ -290,5 +291,27 @@ class StatsCommands(commands.Cog):
             print(f"Traceback: {traceback.format_exc()}")
             await ctx.send(f"An error occurred: {str(e)}", ephemeral=True)
 
+    @commands.hybrid_command(
+        name='standings',
+        with_app_command=True,
+        help='Shows the top 10 rolled characters'
+    )
+    async def standings(self, ctx: commands.Context):
+        try:
+            if isinstance(ctx, discord.Interaction) or ctx.interaction:
+                await ctx.defer()
+                print("Interaction deferred")
+
+            top_ten = StatsManager.get_top_ten()
+            embed = create_top_ten_embed(top_ten)
+
+            await ctx.send(embed=embed)
+
+
+        except Exception as e:
+            print(f"Error in standings command: {str(e)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            await ctx.send(f"An error occured: {str(e)}", ephemeral=True)
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(StatsCommands(bot)) 

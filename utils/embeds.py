@@ -90,6 +90,14 @@ def create_highest_rolls_embed(
         
     return embed
 
+def create_top_ten_embed(standings: dict) -> discord.Embed:
+    embed = discord.Embed(title=EMBED_TOP_TEN, color=discord.Color.gold())
+
+    for character, count in standings.items():
+        embed.add_field(name=character, value=count)
+
+    return embed
+
 def create_raid_master_embed(
     name: str,
     wins: int,

@@ -3,7 +3,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from config.config import MAIN_GUILD_ID
+from config.config import MAIN_GUILD_ID, ALEXBOT_GUILD_ID
 from config.messages import *
 from data.models import RaidMode
 from game.raid import RaidManager
@@ -16,7 +16,7 @@ class RaidCommands(commands.Cog):
         name='raid',
         description='Start a PvE raid!'
     )
-    @app_commands.guilds(discord.Object(id=MAIN_GUILD_ID))
+    @app_commands.guilds(discord.Object(id=MAIN_GUILD_ID), discord.Object(id=ALEXBOT_GUILD_ID))
     @app_commands.choices(mode=[
         app_commands.Choice(name="Campaign", value="campaign"),
         app_commands.Choice(name="Classic", value="classic")

@@ -9,6 +9,8 @@ from config.config import (
     APPLICATION_ID,
     OWNER_ID,
     IMAGES_DIR,
+    ASSETS_DIR,
+    EX_DIR,
     ALLOWED_IMAGE_EXTENSIONS
 )
 from data.storage import storage
@@ -75,7 +77,7 @@ async def roll(ctx: commands.Context):
                 
                 await ctx.reply(
                     "An EX card has been unleashed!",
-                    file=discord.File(f"{IMAGES_DIR}/EX/{ex_card}")
+                    file=discord.File(f"{EX_DIR}/EX/{ex_card}")
                 )
                 print(f"\n{ctx.author.name} has rolled an EX\n")
                 return
@@ -90,7 +92,7 @@ async def roll(ctx: commands.Context):
             if not user_stats.cursed:
                 await ctx.send(
                     f"<@{ctx.author.id}> has been cursed!",
-                    file=discord.File(f"{IMAGES_DIR}/assets/curse.gif")
+                    file=discord.File(f"{ASSETS_DIR}/assets/curse.gif")
                 )
                 storage.update_user_stats(ctx.author.name, cursed=True)
                 
@@ -99,7 +101,7 @@ async def roll(ctx: commands.Context):
             if user_stats.cursed:
                 await ctx.send(
                     f"<@{ctx.author.id}>'s curse has been lifted!",
-                    file=discord.File(f"{IMAGES_DIR}/assets/curse lifted.gif")
+                    file=discord.File(f"{ASSETS_DIR}/assets/curse lifted.gif")
                 )
                 storage.update_user_stats(ctx.author.name, cursed=False)
                 

@@ -34,6 +34,14 @@ class StatsManager:
                 max_chars.append(name)
                 
         return max_chars if len(max_chars) > 1 else max_chars[0], max_wins
+    
+    @staticmethod
+    def get_top_ten():
+        top_chars = {name: stats.count for name, stats in storage.character_stats.items()}
+        sorted_chars = sorted(top_chars.items(), key=lambda item: item[1], reverse=True)
+        
+        return dict(sorted_chars[:10])
+            
 
     @staticmethod
     def increment_character_count(name: str) -> int:

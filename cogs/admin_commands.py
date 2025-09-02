@@ -6,6 +6,7 @@ from typing import Optional
 
 from config.config import (
     MAIN_GUILD_ID,
+    ALEXBOT_GUILD_ID,
     OWNER_ID,
     IMAGES_DIR,
     TOOLS_DIR,
@@ -24,6 +25,7 @@ class AdminCommands(commands.Cog):
         """Sync application commands (owner only)."""
         if ctx.author.id == OWNER_ID:
             await self.bot.tree.sync(guild=discord.Object(id=MAIN_GUILD_ID))
+            await self.bot.tree.sync(guild=discord.Object(id=ALEXBOT_GUILD_ID))
             await ctx.send(SUCCESS_SYNC)
         else:
             await ctx.send(ERR_OWNER_ONLY)

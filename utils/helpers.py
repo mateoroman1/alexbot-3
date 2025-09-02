@@ -45,8 +45,9 @@ def roll_character(revealed_only: bool = True) -> str:
     while True:
         character = get_random_file(IMAGES_DIR)
         name = os.path.splitext(character)[0].casefold()
-        if not revealed_only or storage.get_character_stats(name).count > 0:
-            return character
+        if storage.get_character_stats(name) is not None:
+            if not revealed_only or storage.get_character_stats(name).count > 0:
+                return character
 
 def roll_tool() -> str:
     """Roll a random tool."""
@@ -63,7 +64,7 @@ def roll_boss(mode: str, server_name: str) -> str:
     
     if mode == "campaign":
         boss = server_stats.campaign
-        if boss == "None":
+        if boss == "None" or boss is None:
             boss = "david"
         elif server_stats.campaign == "COMPLETE":
             boss = "Tipp Tronix" if server_stats.campaign_completed % 2 == 1 else "david"
@@ -88,14 +89,15 @@ def calculate_damage_multiplier(character: str, tool: str) -> float:
     base_multiplier = char_stats.count * 10
     
     # Apply tool multiplier
-    if character in tool_stats.character_multipliers:
-        base_multiplier *= tool_stats.character_multipliers[character]
-    else:
-        base_multiplier *= tool_stats.default_multiplier
+    if tool_stats is not None:
+        if character in tool_stats.character_multipliers:
+            base_multiplier *= tool_stats.character_multipliers[character]
+        else:
+            base_multiplier *= tool_stats.default_multiplier
         
     # Apply group bonus
-    if tool_stats.group == char_stats.group:
-        base_multiplier *= 2
+        if tool_stats.group == char_stats.group:
+            base_multiplier *= 2
         
     return base_multiplier
 
