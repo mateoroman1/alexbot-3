@@ -13,6 +13,8 @@ class CharacterStats:
     raids_won: int = 0
     raids_completed: int = 0
     favorite_weapon: str = "None"
+    total_pvp: int = 0
+    pvp_wins: int = 0
     is_1_0: bool = False
 
 @dataclass
@@ -40,6 +42,8 @@ class UserStats:
     raid_wins: int = 0
     deck: List[str] = field(default_factory=list)
     tolls: int = 0
+    total_pvp: int = 0
+    pvp_wins: int = 0
     cursed: bool = False
 
 @dataclass
@@ -54,6 +58,7 @@ class ServerStats:
     total_raids: int = 0
     total_damage: int = 0
     highest_damage: int = 0
+    total_pvp: int = 0
     successful_user: Dict[str, Union[str, int]] = field(default_factory=lambda: {
         "name": "None",
         "raid_wins": 0

@@ -91,23 +91,33 @@ class DataStorage:
         self._save_json_file(SERVER_STATS_FILE, {k: asdict(v) for k, v in self.server_stats.items()})
 
     def get_character_stats(self, name: str) -> Optional[CharacterStats]:
+        if name not in self.character_stats:
+            self.character_stats[name] = CharacterStats()
         """Get stats for a character by name."""
         return self.character_stats.get(name.casefold())
 
     def get_boss_stats(self, name: str) -> Optional[BossStats]:
         """Get stats for a boss by name."""
+        if name not in self.boss_stats:
+            self.boss_stats[name] = BossStats()
         return self.boss_stats.get(name)
 
     def get_tool_stats(self, name: str) -> Optional[ToolStats]:
         """Get stats for a tool by name."""
+        if name not in self.tool_stats:
+            self.tool_stats[name] = ToolStats()
         return self.tool_stats.get(name)
 
     def get_user_stats(self, name: str) -> Optional[UserStats]:
         """Get stats for a user by name."""
+        if name not in self.user_stats:
+            self.user_stats[name] = UserStats()
         return self.user_stats.get(name)
 
     def get_server_stats(self, name: str) -> Optional[ServerStats]:
         """Get stats for a server by name."""
+        if name not in self.server_stats:
+            self.server_stats[name] = ServerStats()
         return self.server_stats.get(name)
 
     def update_character_stats(self, name: str, **kwargs: Any) -> None:
@@ -118,6 +128,16 @@ class DataStorage:
         for k, v in kwargs.items():
             if hasattr(char_stats, k):
                 setattr(char_stats, k, v)
+        self.save_all()
+
+    def update_tool_stats(self, name: str, **kwargs: Any) -> None:
+        """Update stats for a tool."""
+        if name not in self.tool_stats:
+            self.tool_stats[name] = ToolStats()
+        tool_stat = self.tool_stats[name]
+        for k, v in kwargs.items():
+            if hasattr(tool_stat, k):
+                setattr(tool_stat, k, v)
         self.save_all()
 
     def update_user_stats(self, name: str, **kwargs: Any) -> None:

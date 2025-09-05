@@ -165,8 +165,8 @@ class PVPManager:
                 )
                 
                 # Update character stats
-                storage.update_character_stats(host_char.split('.')[0].casefold(), total_pvp=+1)
-                storage.update_character_stats(challenger_char.split('.')[0].casefold(), total_pvp=+1)
+                storage.update_character_stats(host_char.split('.')[0].casefold(), total_pvp=storage.get_character_stats(host_char.split('.')[0].casefold()).total_pvp+1)
+                storage.update_character_stats(challenger_char.split('.')[0].casefold(), total_pvp=storage.get_character_stats(challenger_char.split('.')[0].casefold()).total_pvp+1)
                 
                 # Determine round winner
                 round_winner = self.host_name if host_damage > challenger_damage else self.challenger_name
@@ -175,10 +175,10 @@ class PVPManager:
                 
                 if host_damage > challenger_damage:
                     self.host_wins += 1
-                    storage.update_character_stats(host_char.split('.')[0].casefold(), pvp_wins=+1)
+                    storage.update_character_stats(host_char.split('.')[0].casefold(), pvp_wins=storage.get_character_stats(host_char.split('.')[0].casefold()).pvp_wins+1)
                 else:
                     self.challenger_wins += 1
-                    storage.update_character_stats(challenger_char.split('.')[0].casefold(), pvp_wins=+1)
+                    storage.update_character_stats(challenger_char.split('.')[0].casefold(), pvp_wins=storage.get_character_stats(challenger_char.split('.')[0].casefold()).pvp_wins+1)
                     
                 print(f"Round {self.current_round} winner: {round_winner}")
                 
@@ -220,9 +220,9 @@ class PVPManager:
             StatsManager.increment_pvp_wins(winner)
             
             # Update user stats
-            storage.update_user_stats(self.host_name, total_pvp=+1)
-            storage.update_user_stats(self.challenger_name, total_pvp=+1)
-            storage.update_user_stats(winner, pvp_wins=+1)
+            storage.update_user_stats(self.host_name, total_pvp=storage.get_user_stats(self.host_name).total_pvp+1)
+            storage.update_user_stats(self.challenger_name, total_pvp=storage.get_user_stats(self.challenger_name).total_pvp+1)
+            storage.update_user_stats(winner, pvp_wins=storage.get_user_stats(winner).pvp_wins+1)
             
             # Send final victory message with winner's character
             await self.channel.send(

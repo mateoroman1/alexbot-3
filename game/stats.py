@@ -70,65 +70,6 @@ class StatsManager:
         return 0
 
     @staticmethod
-    def update_user_raid_stats(
-        name: str,
-        damage: float = 0,
-        won: bool = False,
-        ex_card: Optional[str] = None
-    ) -> None:
-        """Update a user's raid-related stats."""
-        user_stats = storage.get_user_stats(name)
-        if not user_stats:
-            user_stats = UserStats()
-            
-        if damage > 0:
-            user_stats.total_damage += damage
-            user_stats.total_raids += 1
-            user_stats.average_damage = user_stats.total_damage / user_stats.total_raids
-            
-            if damage > user_stats.highest_damage:
-                user_stats.highest_damage = damage
-                
-        if won:
-            user_stats.raid_wins += 1
-            
-        if ex_card:
-            user_stats.deck.append(ex_card)
-            
-        storage.user_stats[name] = user_stats
-        storage.save_all()
-
-    @staticmethod
-    def update_server_raid_stats(
-        name: str,
-        damage: float = 0,
-        won: bool = False,
-        campaign_progress: Optional[str] = None
-    ) -> None:
-        """Update a server's raid-related stats."""
-        server_stats = storage.get_server_stats(name)
-        if not server_stats:
-            server_stats = ServerStats()
-            
-        if damage > 0:
-            server_stats.total_damage += damage
-            server_stats.total_raids += 1
-            
-            if damage > server_stats.highest_damage:
-                server_stats.highest_damage = damage
-                
-        if won:
-            server_stats.raid_wins += 1
-            
-        if campaign_progress:
-            if campaign_progress == "COMPLETE":
-                server_stats.campaign_completed += 1
-            server_stats.campaign = campaign_progress
-            
-        storage.server_stats[name] = server_stats
-        storage.save_all()
-
-    @staticmethod
     def get_character_group_members(group: str) -> List[str]:
         """Get all characters in a specific group."""
         return [

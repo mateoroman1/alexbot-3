@@ -44,6 +44,7 @@ async def on_ready():
 async def roll(ctx: commands.Context):
     """Roll a random character."""
     try:
+        user_stats = storage.get_user_stats(ctx.author.name)
         # Get all valid image files
         all_files = os.listdir(IMAGES_DIR)
         valid_files = [
@@ -68,13 +69,9 @@ async def roll(ctx: commands.Context):
                 # Update stats
                 storage.update_user_stats(
                     ctx.author.name,
-                    deck=[name]
+                    deck=user_stats.deck.append(name)
                 )
-                storage.update_server_stats(
-                    ctx.guild.name,
-                    ex_cards=+1
-                )
-                
+
                 await ctx.reply(
                     "An EX card has been unleashed!",
                     file=discord.File(f"{EX_DIR}/EX/{ex_card}")
@@ -88,7 +85,6 @@ async def roll(ctx: commands.Context):
         
         # Check for special characters
         if name == 'the unholy trinity':
-            user_stats = storage.get_user_stats(ctx.author.name)
             if not user_stats.cursed:
                 await ctx.send(
                     f"<@{ctx.author.id}> has been cursed!",
@@ -97,7 +93,6 @@ async def roll(ctx: commands.Context):
                 storage.update_user_stats(ctx.author.name, cursed=True)
                 
         elif name == 'the holy trinity':
-            user_stats = storage.get_user_stats(ctx.author.name)
             if user_stats.cursed:
                 await ctx.send(
                     f"<@{ctx.author.id}>'s curse has been lifted!",
@@ -109,8 +104,8 @@ async def roll(ctx: commands.Context):
         await ctx.reply(file=discord.File(f"{IMAGES_DIR}/{random_image}"))
         status = StatsManager.increment_character_count(name)
         
-        storage.update_user_stats(ctx.author.name, total_rolls=+1)
-        storage.update_server_stats(ctx.guild.name, total_rolls=+1)
+        storage.update_user_stats(ctx.author.name, total_rolls=user_stats.total_rolls + 1)
+        storage.update_server_stats(ctx.guild.name, total_rolls=user_stats.total_rolls + 1)
         
         # Handle status messages
         if status == 1:
