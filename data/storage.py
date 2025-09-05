@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Dict, Optional, TypeVar, Type, Any
+from typing import Dict, Optional, TypeVar, Type, Any, Union
 from dataclasses import asdict
 
 from config.config import (
@@ -90,35 +90,36 @@ class DataStorage:
         self._save_json_file(USER_STATS_FILE, {k: asdict(v) for k, v in self.user_stats.items()})
         self._save_json_file(SERVER_STATS_FILE, {k: asdict(v) for k, v in self.server_stats.items()})
 
-    def get_character_stats(self, name: str) -> Optional[CharacterStats]:
+    def get_character_stats(self, name: str) -> CharacterStats:
+        """Get stats for a character by name."""
+        name = name.casefold()
         if name not in self.character_stats:
             self.character_stats[name] = CharacterStats()
-        """Get stats for a character by name."""
-        return self.character_stats.get(name.casefold())
+        return self.character_stats[name]
 
-    def get_boss_stats(self, name: str) -> Optional[BossStats]:
+    def get_boss_stats(self, name: str) -> BossStats:
         """Get stats for a boss by name."""
         if name not in self.boss_stats:
-            self.boss_stats[name] = BossStats()
-        return self.boss_stats.get(name)
+            self.boss_stats[name] = BossStats(health=0.0, weakness="")
+        return self.boss_stats[name]
 
-    def get_tool_stats(self, name: str) -> Optional[ToolStats]:
+    def get_tool_stats(self, name: str) -> ToolStats:
         """Get stats for a tool by name."""
         if name not in self.tool_stats:
             self.tool_stats[name] = ToolStats()
-        return self.tool_stats.get(name)
+        return self.tool_stats[name]
 
-    def get_user_stats(self, name: str) -> Optional[UserStats]:
+    def get_user_stats(self, name: str) -> UserStats:
         """Get stats for a user by name."""
         if name not in self.user_stats:
             self.user_stats[name] = UserStats()
-        return self.user_stats.get(name)
+        return self.user_stats[name]
 
-    def get_server_stats(self, name: str) -> Optional[ServerStats]:
+    def get_server_stats(self, name: str) -> ServerStats:
         """Get stats for a server by name."""
         if name not in self.server_stats:
             self.server_stats[name] = ServerStats()
-        return self.server_stats.get(name)
+        return self.server_stats[name]
 
     def update_character_stats(self, name: str, **kwargs: Any) -> None:
         """Update stats for a character."""
@@ -168,6 +169,38 @@ class DataStorage:
         for k, v in kwargs.items():
             if hasattr(server_stats, k):
                 setattr(server_stats, k, v)
+        self.save_all()
+
+    def increment_user_stat(self, name: str, field: str, amount: Union[int, float] = 1) -> None:
+        """Increment a user stat by the specified amount."""
+        user_stats = self.get_user_stats(name)
+        if hasattr(user_stats, field):
+            current_value = getattr(user_stats, field, 0)
+            setattr(user_stats, field, current_value + amount)
+        self.save_all()
+
+    def increment_character_stat(self, name: str, field: str, amount: Union[int, float] = 1) -> None:
+        """Increment a character stat by the specified amount."""
+        char_stats = self.get_character_stats(name.casefold())
+        if hasattr(char_stats, field):
+            current_value = getattr(char_stats, field, 0)
+            setattr(char_stats, field, current_value + amount)
+        self.save_all()
+
+    def increment_server_stat(self, name: str, field: str, amount: Union[int, float] = 1) -> None:
+        """Increment a server stat by the specified amount."""
+        server_stats = self.get_server_stats(name)
+        if hasattr(server_stats, field):
+            current_value = getattr(server_stats, field, 0)
+            setattr(server_stats, field, current_value + amount)
+        self.save_all()
+
+    def increment_boss_stat(self, name: str, field: str, amount: Union[int, float] = 1) -> None:
+        """Increment a boss stat by the specified amount."""
+        boss_stats = self.get_boss_stats(name)
+        if hasattr(boss_stats, field):
+            current_value = getattr(boss_stats, field, 0)
+            setattr(boss_stats, field, current_value + amount)
         self.save_all()
 
 # Global instance

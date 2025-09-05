@@ -1,6 +1,7 @@
 import asyncio
 from typing import List, Optional, Dict, Union, Tuple
 import discord
+from discord.ext import commands
 from pathlib import Path
 
 from config.config import (
@@ -87,7 +88,7 @@ class RaidManager:
             storage.update_server_stats(self.server_name, active_raid=False)
             return False
         
-    async def start_raid(self, ctx: discord.ext.commands.Context) -> bool:
+    async def start_raid(self, ctx: commands.Context) -> bool:
         """Start a new raid session."""
         try:
             print("Checking server raid status...")
@@ -175,7 +176,7 @@ class RaidManager:
         evolution_check = []
         
         for player in self.raid_state.player_list:
-            storage.update_user_stats(player, total_raids=storage.get_user_stats(player).total_raids+1)
+            storage.increment_user_stat(player, "total_raids")
             # Draw character and tool
             character = roll_character(revealed_only=True)
             tool = roll_tool()
@@ -199,7 +200,7 @@ class RaidManager:
             if recipe[0] in evolution_check and recipe[1] in evolution_check:
                 self.raid_state.player_data["evolutions_FLAG"] = (evolved, recipe[0], recipe[1])
 
-    async def process_special_tools(self, ctx: discord.ext.commands.Context, player: str, hand: RaidHand) -> List[discord.File]:
+    async def process_special_tools(self, ctx: commands.Context, player: str, hand: RaidHand) -> List[discord.File]:
         """Process special tool effects."""
         files = []
         
@@ -259,7 +260,7 @@ class RaidManager:
                 
         return files
 
-    async def process_raid_results(self, ctx: discord.ext.commands.Context) -> None:
+    async def process_raid_results(self, ctx: commands.Context) -> None:
         """Process and display raid results."""
         await self.draw_cards()
         raid_damage = 0
@@ -279,10 +280,7 @@ class RaidManager:
             if isinstance(data, RaidHand):
                 # Update character stats
                 char_name = data.character.split(".")[0].casefold()
-                storage.update_character_stats(
-                    char_name,
-                    raids_completed=storage.get_character_stats(char_name).raids_completed+1
-                )
+                storage.increment_character_stat(char_name, "raids_completed")
 
                 # Add base hand files
                 hand_files = [
@@ -313,12 +311,18 @@ class RaidManager:
                 )
                 
                 # Update stats
-                storage.update_user_stats(
-                    player,
-                    total_damage=storage.get_user_stats(player).total_damage+round(data.damage_index, 2),
-                    highest_damage=storage.get_user_stats(player).highest_damage if round(data.damage_index, 2) < storage.get_user_stats(player).highest_damage else round(data.damage_index, 2),
-                )
-                storage.update_user_stats(player, average_damage=round(storage.get_user_stats(player).total_damage/storage.get_user_stats(player).total_raids, 2))
+                user_stats = storage.get_user_stats(player)
+                damage = round(data.damage_index, 2)
+                storage.increment_user_stat(player, "total_damage", damage)
+                
+                # Update highest damage if this is higher
+                if damage > user_stats.highest_damage:
+                    storage.update_user_stats(player, highest_damage=damage)
+                
+                # Recalculate average damage
+                updated_stats = storage.get_user_stats(player)
+                average_damage = round(updated_stats.total_damage / updated_stats.total_raids, 2)
+                storage.update_user_stats(player, average_damage=average_damage)
                 raid_damage += round(data.damage_index, 0)
                 hand_files.clear()
                 await asyncio.sleep(5)
@@ -340,7 +344,7 @@ class RaidManager:
 
         # Display boss
         await ctx.send(file=discord.File(f"{BOSSES_DIR}/{self.raid_state.boss}"))
-        storage.update_server_stats(self.server_name, total_raids=storage.get_server_stats(self.server_name).total_raids+1)
+        storage.increment_server_stat(self.server_name, "total_raids")
 
         # Process outcome
         if self.raid_state.boss_health > raid_damage:
@@ -355,14 +359,9 @@ class RaidManager:
                         boss_name=self.raid_state.boss.split(".")[0]
                     )
                 )
-                storage.update_boss_stats(
-                    self.raid_state.boss.split(".")[0],
-                    times_won=storage.get_boss_stats(self.raid_state.boss.split(".")[0]).times_won+1
-                )
-                storage.update_server_stats(
-                    self.server_name,
-                    total_damage=storage.get_server_stats(self.server_name).total_damage+raid_damage
-                )
+                boss_name = self.raid_state.boss.split(".")[0]
+                storage.increment_boss_stat(boss_name, "times_won")
+                storage.increment_server_stat(self.server_name, "total_damage", raid_damage)
         else:
             await ctx.send(
                 RAID_VICTORY.format(
@@ -372,12 +371,9 @@ class RaidManager:
             )
             
             boss_name = self.raid_state.boss.split(".")[0]
-            storage.update_boss_stats(boss_name, times_defeated=storage.get_boss_stats(boss_name).times_defeated+1)
-            storage.update_server_stats(
-                self.server_name,
-                raid_wins=storage.get_server_stats(self.server_name).raid_wins+1,
-                total_damage=storage.get_server_stats(self.server_name).total_damage+raid_damage
-            )
+            storage.increment_boss_stat(boss_name, "times_defeated")
+            storage.increment_server_stat(self.server_name, "raid_wins")
+            storage.increment_server_stat(self.server_name, "total_damage", raid_damage)
 
             if self.mode == RaidMode.CAMPAIGN:
                 if boss_name == "KRYPTIS ZYPHER":
@@ -386,11 +382,8 @@ class RaidManager:
                     
                 boss_stats = storage.get_boss_stats(boss_name)
                 if boss_stats.campaign_id == "COMPLETE":
-                    storage.update_server_stats(
-                        self.server_name,
-                        campaign=boss_stats.campaign_id,
-                        campaign_completed=storage.get_server_stats(self.server_name).campaign_completed+1
-                    )
+                    storage.update_server_stats(self.server_name, campaign=boss_stats.campaign_id)
+                    storage.increment_server_stat(self.server_name, "campaign_completed")
                     self.new_game()
                 else:
                     storage.update_server_stats(
@@ -400,13 +393,13 @@ class RaidManager:
 
             # Update player stats
             for player in self.raid_state.player_list:
-                storage.update_user_stats(player, raid_wins=storage.get_user_stats(player).raid_wins+1)
+                storage.increment_user_stat(player, "raid_wins")
                 
             # Update character stats
             for hand in self.raid_state.player_data.values():
                 if isinstance(hand, RaidHand):
                     char_name = hand.character.split(".")[0].casefold()
-                    storage.update_character_stats(char_name, raids_won=storage.get_character_stats(char_name).raids_won+1)
+                    storage.increment_character_stat(char_name, "raids_won")
                     
                     if hand.tool:
                         tool_name = hand.tool.split(".")[0]
@@ -431,7 +424,7 @@ class RaidManager:
             if boss_name != "death":
                 stats.health *= 1.25
 
-    async def process_death_vote(self, ctx: discord.ext.commands.Context) -> None:
+    async def process_death_vote(self, ctx: commands.Context) -> None:
         """Process death vote sequence."""
         embed = create_death_vote_embed()
         brave = 0

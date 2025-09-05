@@ -61,11 +61,11 @@ class StatsManager:
         storage.save_all()
         
         if char_stats.count > count:
+            if char_stats.count == 100:
+                return 100
             return 1
         elif char_stats.count == count:
             return 2
-        elif char_stats.count > count and char_stats.count == 100:
-            return 100
             
         return 0
 
